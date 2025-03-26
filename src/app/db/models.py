@@ -1,7 +1,5 @@
-from sqlalchemy import Column, Integer, String, Text, JSON
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
+from sqlalchemy import Column, Integer, String, Text, JSON, DateTime, func
+from .database import Base
 
 class PodcastEpisode(Base):
     __tablename__ = "podcast_episodes"
@@ -14,3 +12,6 @@ class PodcastEpisode(Base):
     podcast_guest = Column(JSON, nullable=False)
     podcast_highlights = Column(Text, nullable=False)
     podcast_transcription = Column(Text, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+    

@@ -11,6 +11,8 @@ client = OpenAI(
     api_key=os.environ["GITHUB_TOKEN"]
 )
 
+my_model = "gpt-4o-mini"
+
 def get_podcast_summary(podcast_transcript):
     instructPrompt = """
     You are an expert copywriter who is responsible for publishing newsletters with thousands of subscribers. You recently listened to a great podcast
@@ -20,7 +22,7 @@ def get_podcast_summary(podcast_transcript):
     """
     request = instructPrompt + podcast_transcript
     chatOutput = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=my_model,
         messages = [
             {"role": "system", "content": "You are a helpful assistant"},
             {"role": "user", "content": request}
@@ -32,7 +34,7 @@ def get_podcast_guest(podcast_transcript):
     request = podcast_transcript[:10000]
 
     completion = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=my_model,
         messages = [
             {"role": "user", "content": request}
         ],
@@ -99,7 +101,7 @@ def get_podcast_highlights(podcast_transcript):
     """
     request = instructPrompt + podcast_transcript
     chatOutput = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=my_model,
         messages = [
             {"role": "system", "content": "You are a helpful assistant"},
             {"role": "user", "content": request}
