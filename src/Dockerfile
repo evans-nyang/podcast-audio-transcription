@@ -12,8 +12,8 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --upgrade pip wheel setuptools
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir llama-cpp-python==0.2.77 --verbose
+RUN pip install -r requirements.txt
+RUN pip install llama-cpp-python==0.2.77 --verbose
 RUN pip install git+https://github.com/stlukey/whispercpp.py
 
 COPY app .
