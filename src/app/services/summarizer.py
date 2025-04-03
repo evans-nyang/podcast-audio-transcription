@@ -4,6 +4,8 @@ import wikipedia
 from openai import OpenAI
 from dotenv import load_dotenv
 
+from .prompt import model_instructions, example1, example2
+
 load_dotenv()
 
 client = OpenAI(
@@ -11,7 +13,7 @@ client = OpenAI(
     api_key=os.environ["GITHUB_TOKEN"]
 )
 
-my_model = "gpt-4o-mini"
+model_name = "gpt-4o-mini"
 
 def get_podcast_summary(podcast_transcript):
     instructPrompt = """
@@ -22,23 +24,25 @@ def get_podcast_summary(podcast_transcript):
     """
     request = instructPrompt + podcast_transcript
     chatOutput = client.chat.completions.create(
-        model=my_model,
+        model=model_name,
         messages = [
             {"role": "system", "content": "You are a helpful assistant"},
             {"role": "user", "content": request}
         ]
     )
-    return chatOutput.choices[0].message.content
+    
+    return {"summary": chatOutput.choices[0].message.content}
 
 def get_podcast_guest(podcast_transcript):
-    request = podcast_transcript[:10000]
+    prompt_template = model_instructions + example1 + example2
+    request = prompt_template + podcast_transcript[:10000]
 
     completion = client.chat.completions.create(
-        model=my_model,
+        model=model_name,
         messages = [
             {"role": "user", "content": request}
         ],
-        functions=[
+        functions = [
             {
                 "name": "get_podcast_guest_information",
                 "description": "Get information on the podcast guest using their full name and the name of the organization they are part of to search for them on Wikipedia",
@@ -53,7 +57,7 @@ def get_podcast_guest(podcast_transcript):
                 },
             }
         ],
-        function_call={"name": "get_podcast_guest_information"}
+        function_call = {"name": "get_podcast_guest_information"}
     )
     response_message = completion.choices[0].message
 
@@ -101,10 +105,10 @@ def get_podcast_highlights(podcast_transcript):
     """
     request = instructPrompt + podcast_transcript
     chatOutput = client.chat.completions.create(
-        model=my_model,
+        model=model_name,
         messages = [
             {"role": "system", "content": "You are a helpful assistant"},
             {"role": "user", "content": request}
         ]
     )
-    return chatOutput.choices[0].message.content
+    return {"highlights": chatOutput.choices[0].message.content}
