@@ -8,9 +8,9 @@ class PodcastEpisode(Base):
     podcast_title = Column(String, nullable=False)
     episode_title = Column(String, nullable=False)
     episode_image = Column(String, nullable=False)
-    podcast_summary = Column(Text, nullable=False)
+    podcast_summary = Column(JSON, nullable=False)
     podcast_guest = Column(JSON, nullable=False)
-    podcast_highlights = Column(Text, nullable=False)
+    podcast_highlights = Column(JSON, nullable=False)
     podcast_transcription = Column(Text, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
 

@@ -4,9 +4,9 @@ class PodcastEpisodeBase(BaseModel):
     podcast_title: str
     episode_title: str
     episode_image: str
-    podcast_summary: str
+    podcast_summary: dict
     podcast_guest: dict
-    podcast_highlights: str
+    podcast_highlights: dict
     podcast_transcription: str
 
 class PodcastEpisodeCreate(PodcastEpisodeBase):
