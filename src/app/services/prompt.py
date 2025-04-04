@@ -1,83 +1,81 @@
 model_instructions = """
-Solve a question answering task with interleaving Thought, Action, Observation steps. Thought can reason about the current situation,
-Observation is understanding relevant information from an Action's output and Action can be one of three types:
- (1) <search>entity</search>, which searches the exact entity on Wikipedia and returns the first paragraph if it exists. If not, it
-     will return some similar entities to search and you can try to search the information from those topics.
- (2) <lookup>keyword</lookup>, which returns the next sentence containing keyword in the current context. This only does exact matches,
-     so keep your searches short.
- (3) <finish>answer</finish>, which returns the answer and finishes the task.
+Solve a podcast guest extraction task using interleaving Thought, Action, Observation steps.
+Thought can reason about the current situation, Observation understands relevant information from an Action's output, and Action can be one of three types:
+  
+  (1) <search>entity</search>: Searches for the exact entity in a knowledge source and returns relevant details.
+  (2) <lookup>keyword</lookup>: Finds the next sentence containing the keyword in the podcast transcript or summary.
+  (3) <finish>guest names</finish>: Returns a list of extracted guest names and finishes the task.
 """
 
-example1 = """Question
-Musician and satirist Allie Goertz wrote a song about the "The Simpsons" character Milhouse, who Matt Groening named after who?
+prompt1 = """Question
+Who are the guests mentioned in the following podcast summary?
+
+Summary:
+"In this episode, host Jane Doe sits down with Dr. Emily Carter and tech entrepreneur Alex Reed to discuss the future of artificial intelligence. 
+Emily, a professor at MIT, shares her insights on ethical AI, while Alex talks about how his startup is leveraging AI for medical breakthroughs."
 
 Thought 1
-The question simplifies to "The Simpsons" character Milhouse is named after who. I only need to search Milhouse and find who it is named after.
+The question asks for guest names in the podcast. I need to identify proper names from the summary.
 
 Action 1
-<search>Milhouse</search>
+<lookup>Dr.</lookup>
 
 Observation 1
-Milhouse Mussolini Van Houten is a recurring character in the Fox animated television series The Simpsons voiced by Pamela Hayden and created by Matt Groening.
+Dr. Emily Carter is mentioned in the summary.
 
 Thought 2
-The paragraph does not tell who Milhouse is named after, maybe I can look up "named after".
+Emily Carter is a guest. Now, I need to check for any other names.
 
 Action 2
-<lookup>named after</lookup>
+<lookup>entrepreneur</lookup>
 
 Observation 2
-Milhouse was named after U.S. president Richard Nixon, whose middle name was Milhous.
+Tech entrepreneur Alex Reed is also mentioned.
 
 Thought 3
-Milhouse was named after U.S. president Richard Nixon, so the answer is Richard Nixon.
+Alex Reed is another guest. The full list of guests is: Dr. Emily Carter, Alex Reed.
 
 Action 3
-<finish>Richard Nixon</finish>
+<finish>Dr. Emily Carter, Alex Reed</finish>
 """
 
-example2 = """Question
-What is the elevation range for the area that the eastern sector of the Colorado orogeny extends into?
+prompt2 = """Question
+Identify all guests from this podcast transcript.
+
+Transcript:
+"Welcome back to the AI Revolution Podcast! I'm your host, Mark Benson. Today, we have an amazing panel featuring Dr. Susan Wright, an AI researcher at Stanford, 
+along with journalist Kevin Patel and CEO Linda Huang, who will share their insights on AI ethics and business applications."
 
 Thought 1
-I need to search Colorado orogeny, find the area that the eastern sector of the Colorado orogeny extends into, then find the elevation range of the area.
+I need to find names of people who are identified as guests.
 
 Action 1
-<search>Colorado orogeny</search>
+<lookup>Dr.</lookup>
 
 Observation 1
-The Colorado orogeny was an episode of mountain building (an orogeny) in Colorado and surrounding areas.
+Dr. Susan Wright is mentioned.
 
 Thought 2
-It does not mention the eastern sector. So I need to look up eastern sector.
+Susan Wright is a guest. Now, I need to check for more guests.
 
 Action 2
-<lookup>eastern sector</lookup>
+<lookup>journalist</lookup>
 
 Observation 2
-The eastern sector extends into the High Plains and is called the Central Plains orogeny.
+Journalist Kevin Patel is mentioned.
 
 Thought 3
-The eastern sector of Colorado orogeny extends into the High Plains. So I need to search High Plains and find its elevation range.
+Kevin Patel is a guest. I should check for any more guests.
 
 Action 3
-<search>High Plains</search>
+<lookup>CEO</lookup>
 
 Observation 3
-High Plains refers to one of two distinct land regions
+CEO Linda Huang is mentioned.
 
 Thought 4
-I need to instead search High Plains (United States).
+Linda Huang is also a guest. The full list of guests is: Dr. Susan Wright, Kevin Patel, Linda Huang.
 
 Action 4
-<search>High Plains (United States)</search>
-
-Observation 4
-The High Plains are a subregion of the Great Plains. From east to west, the High Plains rise in elevation from around 1,800 to 7,000 ft (550 to 2,130m).
-
-Thought 5
-High Plains rise in elevation from around 1,800 to 7,000 ft, so the answer is 1,800 to 7,000 ft.
-
-Action 5
-<finish>1,800 to 7,000 ft</finish>
+<finish>Dr. Susan Wright, Kevin Patel, Linda Huang</finish>
 """
