@@ -4,6 +4,8 @@ import wikipedia
 from openai import OpenAI
 from dotenv import load_dotenv
 
+from .prompt import model_instructions, prompt1, prompt2
+
 load_dotenv()
 
 client = OpenAI(
@@ -11,7 +13,7 @@ client = OpenAI(
     api_key=os.environ["GITHUB_TOKEN"]
 )
 
-my_model = "gpt-4o-mini"
+model_name = "gpt-4o-mini"
 
 def get_podcast_summary(podcast_transcript):
     instructPrompt = """
@@ -22,20 +24,22 @@ def get_podcast_summary(podcast_transcript):
     """
     request = instructPrompt + podcast_transcript
     chatOutput = client.chat.completions.create(
-        model=my_model,
+        model=model_name,
         messages = [
             {"role": "system", "content": "You are a helpful assistant"},
             {"role": "user", "content": request}
         ]
     )
-    return chatOutput.choices[0].message.content
+    
+    return {"summary": chatOutput.choices[0].message.content}
 
 def get_podcast_guest(podcast_transcript):
-    request = podcast_transcript[:10000]
+    prompt_template = model_instructions + prompt1 + prompt2
+    request = prompt_template + podcast_transcript[:10000]
 
     completion = client.chat.completions.create(
-        model=my_model,
-        messages = [
+        model=model_name,
+        messages=[
             {"role": "user", "content": request}
         ],
         functions=[
@@ -55,8 +59,8 @@ def get_podcast_guest(podcast_transcript):
         ],
         function_call={"name": "get_podcast_guest_information"}
     )
+    
     response_message = completion.choices[0].message
-
     podcast_guest = ""
     podcast_guest_org = ""
     podcast_guest_title = ""
@@ -72,11 +76,13 @@ def get_podcast_guest(podcast_transcript):
             page = wikipedia.page(f"{podcast_guest} {podcast_guest_org} {podcast_guest_title}", auto_suggest=True)
             podcast_guest_summary = page.summary
         except wikipedia.exceptions.PageError:
-            podcast_guest_summary = "Not Available"
+            podcast_guest_summary = "Guest information not available."
         except wikipedia.exceptions.DisambiguationError as e:
-            podcast_guest_summary = "Not Available"
+            podcast_guest_summary = f"Disambiguation issue: {e.options[:5]}"  # List top 5 suggestions
+        except Exception as ex:
+            podcast_guest_summary = f"Error retrieving guest information: {str(ex)}"
     else:
-        podcast_guest_summary = "Not Available"
+        podcast_guest_summary = "No guest information provided."
 
     return {
         "name": podcast_guest,
@@ -84,6 +90,7 @@ def get_podcast_guest(podcast_transcript):
         "title": podcast_guest_title,
         "summary": podcast_guest_summary
     }
+
 
 def get_podcast_highlights(podcast_transcript):
     instructPrompt = """
@@ -101,10 +108,10 @@ def get_podcast_highlights(podcast_transcript):
     """
     request = instructPrompt + podcast_transcript
     chatOutput = client.chat.completions.create(
-        model=my_model,
+        model=model_name,
         messages = [
             {"role": "system", "content": "You are a helpful assistant"},
             {"role": "user", "content": request}
         ]
     )
-    return chatOutput.choices[0].message.content
+    return {"highlights": chatOutput.choices[0].message.content}
